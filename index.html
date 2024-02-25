@@ -3,13 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitHub Pages</title>
-    <link rel="stylesheet" href="style.css">
-    
+    <title>Google Sheets Data</title>
 </head>
 <body>
-    <h1>Hello World</h1>
-    <p>My name is Rico. :) </p>
-    <img src="assets\images\brownie.jpg" alt="Brownie Pic">
+    <h1>Data from Google Sheet</h1>
+    <div id="data"></div>
+
+    <!-- Load the Google API client library -->
+    <script src="https://apis.google.com/js/api.js?onload=handleClientLoad"></script>
+
+    <script>
+        // Replace 'YOUR_SPREADSHEET_ID' and 'YOUR_API_KEY' with your actual Google Sheet ID and API Key
+        const spreadsheetId = '1qwL_Bc2qYD9HzK_pxuXIdny5JR_IFYu-T2VtY_tQI1U';
+        const apiKey = 'AIzaSyCbaSR5foqZ0dwbN-QteXqtz4khyjBEerw';
+
+        // Load the API library
+        function loadSheetsApi() {
+            gapi.client.init({
+                'apiKey': apiKey,
+                'discoveryDocs': ['https://sheets.googleapis.com/$discovery/rest'],
+            }).then(function () {
+                // Call the function to get data from Google Sheet
+                getDataFromSheet();
+            });
+        }
+
+        // Function to get data from Google Sheet
+        function getDataFromSheet() {
+            gapi.client.sheets.spreadsheets.values.get({
+                spreadsheetId: spreadsheetId,
+                range: 'Sheet1!A1:C3', // Change 'Sheet1' to your actual sheet name
+            }).then(function(response) {
+                const range = response.result;
+                if (range.values.length > 0) {
+                    const data = range.values;
+                    const dataDiv = document.getElementById('data');
+                    dataDiv.innerHTML = '<table>';
+                    data.forEach(function(row) {
+                        dataDiv.innerHTML += '<tr><td>' + row[0] + '</td><td>' + row[1] + '</td></tr>';
+                    });
+                    dataDiv.innerHTML += '</table>';
+                } else {
+                    console.log('No data found.');
+                }
+            }, function(response) {
+                console.log('Error: ' + response.result.error.message);
+            });
+        }
+
+        // Initialize API client library
+        function initClient() {
+            gapi.client.init({
+                apiKey: apiKey,
+                discoveryDocs: ["https://sheets.googleapis.com/$discovery/rest"],
+            }).then(loadSheetsApi);
+        }
+
+        // Load the API client and auth2 library
+        function handleClientLoad() {
+            gapi.load('client:auth2', initClient);
+        }
+    </script>
 </body>
 </html>
